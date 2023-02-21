@@ -96,7 +96,6 @@
 				})
 				
 				this.floorList = res.message
-				console.log(this.floorList);
 			}
 		}
 	}
