@@ -23,7 +23,7 @@
 				</view>
 			</view>
 			<!-- 运费 -->
-			<view class="yf">快递：免运费</view>
+			<view class="yf">快递：免运费 -- {{cart.length}}</view>
 		</view>
 		
 		<!-- 商品详情信息 -->
@@ -42,6 +42,7 @@
 </template>
 
 <script>
+	import {mapState, mapMutations, mapGetters} from 'vuex'
 	export default {
 		data() {
 			return {
@@ -62,10 +63,30 @@
 					backgroundColor: '#ff0000',
 					color: '#ffffff'
 				}, {
-					text: '加入购物车',
+					text: '立即购买',
 					backgroundColor: '#ffa200',
 					color: '#ffffff'
 				}]
+			}
+		},
+		computed: {
+			// 调用mapState方法，把m_cart模块中的cart数组映射到当前页面，作为计算属性使用
+			...mapState('m_cart', ['cart']),
+			...mapGetters('m_cart', ['total'])
+		},
+		watch: {
+			// 定义total侦听器，指向一个配置对象
+			total: {
+				// handler 方法用来定义侦听器的处理函数
+				handler(newVal) {
+					// 通过数组的find()方法，找到购物车按钮的配置对象
+					const findResult = this.options.find(x => x.text === '购物车')
+					if(findResult) {
+						// 动态为购物车按钮的info属性赋值
+						findResult.info = newVal
+					}
+				},
+				immediate: true
 			}
 		},
 		onLoad(options) {
@@ -101,7 +122,26 @@
 						url: '/pages/cart/cart'
 					})
 				}
-			}
+			},
+			// 右侧按钮点击事件处理函数
+			buttonClick(e) {
+				// 1. 判断是否点击了加入购物车按钮
+				if(e.content.text === '加入购物车') {
+					// 2. 组织一个商品的信息对象
+					const goods = {
+						goods_id: this.goods_info.goods_id,
+						goods_name: this.goods_info.goods_name,
+						goods_price: this.goods_info.goods_price,
+						goods_count: 1,
+						goods_small_logo: this.goods_info.goods_small_logo,
+						goods_state: true
+					}
+					// 3. 通过this调用映射过来的addToCart方法，把商品信息对象存储到购物车中
+					this.addToCart(goods)
+				}
+			},
+			// 把m_cart模块中的addToCart方法映射到当前页面使用
+			...mapMutations('m_cart', ['addToCart']),
 		}
 	}
 </script>
