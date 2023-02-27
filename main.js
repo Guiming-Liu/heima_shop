@@ -4,12 +4,21 @@ import App from './App'
 import {$http} from '@escook/request-miniprogram'
 uni.$http = $http
 // 配置请求根路径
-$http.baseUrl = 'https://www.uinav.com'
+$http.baseUrl = 'https://api-hmugo-web.itheima.net'
 // 请求开始之前，做一些事情
-$http.beforeRequest = () => {
+$http.beforeRequest = (options) => {
 	uni.showLoading({
 		title: '数据加载中...'
 	})
+	
+	// 判断请求的是否为有权限额API接口
+	if(options.url.indexOf('/my/') !== -1) {
+		// 为请求头添加身份认证字段
+		options.header = {
+			// 字段的值可以直接从vuex中进行获取
+			Authorization: store.state.m_user.token,
+		}
+	}
 }
 // 请求完成之后，做一些事情
 $http.afterRequest = (res) => {
